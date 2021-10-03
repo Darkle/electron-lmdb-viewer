@@ -1,13 +1,12 @@
 {
-  "name": "lmdb-viewer",
+  "name": "electron-lmdb-viewer",
   "version": "0.1.0",
   "description": "",
   "main": "boot.js",
   "scripts": {
-    "start": "electron ."
-  },
-  "engines": {
-    "node": ">=14.17.6"
+    "reinstall-lmdb": "npm uninstall lmdb lmdb-store && npm i lmdb lmdb-store",
+    "create-test-dbs": "npm run reinstall-lmdb && node ./create-test-dbs.js && electron-rebuild",
+    "start": "electron . --no-sandbox"
   },
   "browserslist": [
     "Firefox ESR",
@@ -23,6 +22,7 @@
   "devDependencies": {
     "cbor-x": "^0.8.3",
     "electron": "^15.1.0",
+    "electron-rebuild": "^3.2.3",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-xo": "^0.38.0",
@@ -41,13 +41,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Darkle/node-lmdb-viewer.git"
+    "url": "git+https://github.com/Darkle/electron-lmdb-viewer.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Darkle/node-lmdb-viewer/issues"
+    "url": "https://github.com/Darkle/electron-lmdb-viewer/issues"
   },
-  "homepage": "https://github.com/Darkle/node-lmdb-viewer#readme"
+  "homepage": "https://github.com/Darkle/electron-lmdb-viewer#readme"
 }

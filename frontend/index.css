@@ -1,0 +1,52 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.3rem;
+}
+
+#db-selection {
+  display: flex;
+}
+
+#settings-container {
+  margin-right: 6rem;
+  display: flex;
+  flex-direction: column;
+}
+
+#compression-checkbox-container {
+  margin-bottom: 0.7rem;
+}
+
+label[for='compression'] {
+  margin-left: 0.2rem;
+}
+
+label[for='database-encoding-type-select'] {
+  margin-bottom: 0.4rem;
+}
+
+#db-file-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#db-path-location {
+  margin-top: 0.8rem;
+  width: 300px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+#spacer {
+  width: 80vh;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#db-select-button {
+  max-width: 6rem;
+}
