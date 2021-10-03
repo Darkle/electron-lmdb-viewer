@@ -35,7 +35,8 @@ label[for='database-encoding-type-select'] {
 
 #db-path-location {
   margin-top: 0.8rem;
-  width: 300px;
+
+  /* width: 300px; */
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;

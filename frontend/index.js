@@ -17,6 +17,9 @@ document.querySelector('#db-select-button').addEventListener('click', () => {
   const dbEncodingType = document.querySelector('#database-encoding-type-select').value.trim()
 
   api.openNewDb(compression, dbEncodingType).then(dbData => {
+    if (!dbData || dbData instanceof Error) {
+      return
+    }
     document.querySelector('#db-path-location').textContent = dbData.dbFilePath
 
     grid

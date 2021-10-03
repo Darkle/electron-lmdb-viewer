@@ -39,10 +39,7 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
 
     if (db) db.close()
 
-    db = lmdb.open(dbPath, {
-      compression,
-      encoding: dbEncodingType,
-    })
+    db = lmdb.open(dbPath, { compression, encoding: dbEncodingType })
 
     let totalItemsInDB = []
     let rangeOfItemsInDB = []
@@ -55,5 +52,6 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
     return { totalNumItemsInDB: totalItemsInDB.length, items: rangeOfItemsInDB, dbFilePath: dbPath }
   } catch (err) {
     console.error(err)
+    dialog.showErrorBox('Error Opening DB', err.toString())
   }
 })
