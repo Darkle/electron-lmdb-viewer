@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { Grid } from 'gridjs'
 
-const grid = new Grid().render(document.getElementById('wrapper') as HTMLElement)
+const grid = new Grid().render(document.getElementById('wrapper'))
 
-new Grid().updateConfig({
+grid.updateConfig({
   columns: ['Name', 'Email', 'Phone Number'],
   data: [
     ['John', 'john@example.com', '(353) 01 222 3333'],

@@ -2,14 +2,9 @@
   "name": "lmdb-viewer",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "boot.js",
   "scripts": {
-    "create-test-dbs": "ts-node ./create-test-dbs.ts",
-    "t-watch-front": "ttsc --project ./tsconfig-frontend.json --watch --incremental --pretty --preserveWatchOutput",
-    "t-watch-back": "ts-node-dev --watch=./frontend/index.html --ignore-watch=frontend ./server.ts",
-    "bs": "browser-sync start --watch --reload-delay 1500 --no-open --no-notify --no-ui --no-ghost-mode --no-inject-changes --files=./frontend/**/* --files=./server.ts --ignore=node_modules --port 8081 --proxy 'http://127.0.0.1:3131'",
-    "dev": "concurrently --raw --prefix=none \"npm:t-watch-front\" \"npm:bs\" \"npm:t-watch-back\"",
-    "prod": "ts-node ./server.ts"
+    "start": "electron ."
   },
   "engines": {
     "node": ">=14.17.6"
@@ -26,11 +21,7 @@
     "lmdb-store": "^1.6.8"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.32.0",
-    "@typescript-eslint/parser": "^4.32.0",
-    "browser-sync": "^2.27.5",
     "cbor-x": "^0.8.3",
-    "concurrently": "^6.3.0",
     "electron": "^15.1.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
@@ -46,13 +37,7 @@
     "js-image-generator": "^1.0.3",
     "npm-check-updates": "^11.8.5",
     "stylelint": "^13.13.1",
-    "stylelint-config-standard": "^22.0.0",
-    "ts-node": "^10.2.1",
-    "ts-node-dev": "^1.1.8",
-    "ts-transform-esm-import": "^0.3.x",
-    "ts-typie": "^1.1.1",
-    "ttypescript": "^1.5.12",
-    "typescript": "^4.4.3"
+    "stylelint-config-standard": "^22.0.0"
   },
   "repository": {
     "type": "git",
