@@ -1,0 +1,7 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "no-descending-specificity": null
+  },
+  "ignoreFiles": ["./.eslintrc.cjs", "**/*.cjs", "node_modules/**/*", "LICENSE", "**/*.js", "**/*.eta"]
+}
