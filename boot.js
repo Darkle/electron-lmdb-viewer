@@ -14,7 +14,7 @@ function createWindow() {
     },
   })
 
-  win.loadFile(path.join(process.cwd(), 'frontend', 'index.html'))
+  win.loadFile(path.join(process.cwd(), 'renderer', 'index.html'))
 }
 
 app.whenReady().then(() => {
