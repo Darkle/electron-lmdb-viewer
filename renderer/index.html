@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="./static/database_lightning_icon.png" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Electron LMDB Viewer</title>
@@ -11,32 +10,38 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <div id="db-selection">
-      <fieldset id="settings-container">
-        <legend>DB settings:</legend>
-        <div id="compression-checkbox-container">
-          <input type="checkbox" id="compression" name="compression" />
-          <label for="compression">Compression</label>
-        </div>
+    <div id="container">
+      <div id="db-selection">
+        <fieldset id="settings-container">
+          <legend>DB settings:</legend>
+          <div id="compression-checkbox-container">
+            <input type="checkbox" id="compression" name="compression" />
+            <label for="compression">Compression</label>
+          </div>
 
-        <label for="database-encoding-type-select">DB Encoding Type</label>
-        <select name="database-encoding-type-select" id="database-encoding-type-select">
-          <option value="msgpack">msgpack</option>
-          <option value="cbor">cbor</option>
-          <option value="json">json</option>
-          <option value="string">string</option>
-          <option value="binary">binary</option>
-        </select>
-      </fieldset>
-      <fieldset id="db-file-container">
-        <legend>DB File:</legend>
-        <button id="db-select-button">Open DB</button>
-        <span id="db-path-location"></span>
-      </fieldset>
+          <label for="database-encoding-type-select">DB Encoding Type</label>
+          <select name="database-encoding-type-select" id="database-encoding-type-select">
+            <option value="msgpack">msgpack</option>
+            <option value="cbor">cbor</option>
+            <option value="json">json</option>
+            <option value="string">string</option>
+            <option value="binary">binary</option>
+          </select>
+        </fieldset>
+        <fieldset id="db-file-container">
+          <legend>DB File:</legend>
+          <button id="db-select-button">Open DB</button>
+          <span id="db-path-location"></span>
+        </fieldset>
+        <p>
+          Note: You can ctrl-click on a key or value to copy it to the clipboard. Copying/Editing binary
+          key/values is currently not supported.
+        </p>
+      </div>
+      <div id="grid-container">
+        <div id="grid-wrapper"></div>
+      </div>
     </div>
-    <hr id="spacer" />
-    <div id="grid-wrapper"></div>
-
     <script src="static/gridjs@5.0.2.min.js"></script>
     <script src="index.js"></script>
   </body>

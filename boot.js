@@ -7,11 +7,12 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1400,
+    height: 1000,
     webPreferences: {
       preload: path.join(process.cwd(), 'preload.js'),
     },
+    icon: path.join(process.cwd(), 'app-icon.png'),
   })
 
   win.loadFile(path.join(process.cwd(), 'renderer', 'index.html'))
@@ -41,17 +42,19 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
 
     db = lmdb.open(dbPath, { compression, encoding: dbEncodingType })
 
-    let totalItemsInDB = []
-    let rangeOfItemsInDB = []
+    const dbItems = []
 
-    await db.transactionAsync(() => {
-      db.getKeys().forEach(item => totalItemsInDB.push(item))
-      db.getRange({ limit: 500 }).forEach(item => rangeOfItemsInDB.push(item))
-    })
+    db.getRange().forEach(item => dbItems.push(item))
 
-    return { totalNumItemsInDB: totalItemsInDB.length, items: rangeOfItemsInDB, dbFilePath: dbPath }
+    return { items: dbItems, dbFilePath: dbPath }
   } catch (err) {
     console.error(err)
-    dialog.showErrorBox('Error Opening DB', err.toString())
+
+    const errorMessage = err.toString()
+    const additionalMessage = errorMessage.includes('Data read, but end of buffer not reached')
+      ? '\nDid you remember to set the right DB settings?'
+      : ''
+
+    dialog.showErrorBox('Error Opening DB', err.toString() + additionalMessage)
   }
 })

@@ -1,29 +1,116 @@
 // @ts-nocheck
 
-const grid = new gridjs.Grid({
-  columns: ['Key', 'Value'],
-  data: [[null, null]],
-  search: true,
-  language: {
-    search: {
-      placeholder: 'Search...',
+const $$ = q => Array.from(document.querySelectorAll(q))
+const $ = document.querySelector.bind(document)
+
+let grid = null
+
+const isBinaryBuffer = val => val instanceof Uint8Array
+
+let userIsPressingCtrlKey = false
+
+document.addEventListener('keydown', event => {
+  if (event.code === 'ControlLeft' || event.code === 'ControlRight') {
+    userIsPressingCtrlKey = true
+  }
+})
+
+document.addEventListener('keyup', event => {
+  if (event.code === 'ControlLeft' || event.code === 'ControlRight') {
+    userIsPressingCtrlKey = false
+  }
+})
+
+const tdMouseEvents = {
+  onclick: () => {
+    if (!userIsPressingCtrlKey) return
+    api.copyToClipBoard(cell)
+  },
+  onmouseenter: event => {
+    if (!userIsPressingCtrlKey) return
+    event.target.style.cursor = 'pointer'
+  },
+  onmouseleave: event => {
+    event.target.style.cursor = 'auto'
+  },
+  onmousemove: event => {
+    if (userIsPressingCtrlKey) {
+      event.target.style.cursor = 'pointer'
+    } else {
+      event.target.style.cursor = 'auto'
+    }
+  },
+}
+
+const columns = [
+  'Row',
+  {
+    name: 'Key',
+    attributes: cell => {
+      if (cell) {
+        return tdMouseEvents
+      }
     },
   },
-  server: false,
-}).render(document.getElementById('grid-wrapper'))
+  {
+    name: 'Value',
+    attributes: cell => {
+      if (cell) {
+        return tdMouseEvents
+      }
+    },
+  },
+]
 
-document.querySelector('#db-select-button').addEventListener('click', () => {
-  const compression = document.querySelector('#compression').checked
-  const dbEncodingType = document.querySelector('#database-encoding-type-select').value.trim()
+function processDBData({ key, value }, index) {
+  if (isBinaryBuffer(value)) {
+    value = 'hex:' + value.toString('hex').slice(0, 100) + '...'
+  }
+  if (isBinaryBuffer(key)) {
+    key = 'hex:' + value.toString('hex').slice(0, 100) + '...'
+  }
+
+  return [index + 1, key, value]
+}
+
+$('#db-select-button').addEventListener('click', () => {
+  const compression = $('#compression').checked
+  const dbEncodingType = $('#database-encoding-type-select').value.trim()
 
   api.openNewDb(compression, dbEncodingType).then(dbData => {
     if (!dbData || dbData instanceof Error) {
       return
     }
-    document.querySelector('#db-path-location').textContent = dbData.dbFilePath
+
+    $('#db-path-location').textContent = dbData.dbFilePath
+
+    const data = dbData.items.map(processDBData)
+
+    if (!grid) {
+      grid = new gridjs.Grid({
+        columns: columns,
+        data,
+        search: true,
+        height: 'calc(100vh - 10.2em)',
+        pagination: {
+          enabled: true,
+          limit: 500,
+        },
+        language: {
+          search: {
+            placeholder: 'Search...',
+          },
+        },
+        server: false,
+      }).render(document.getElementById('grid-wrapper'))
+      return
+    }
 
     grid
-      .updateConfig({ columns: ['Key', 'Value'], data: dbData.items.map(({ key, value }) => [key, value]) })
+      .updateConfig({
+        columns: columns,
+        data,
+      })
       .forceRender()
   })
 })

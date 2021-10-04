@@ -75,10 +75,12 @@ let binary_with_compression = lmdb.open({
   encoding: 'binary',
 })
 
+const arrayLength = 50_000
+
 Promise.all([
   msgpack_no_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         msgpack_no_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -86,7 +88,7 @@ Promise.all([
 
   msgpack_with_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         msgpack_with_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -94,7 +96,7 @@ Promise.all([
 
   json_no_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         json_no_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -102,7 +104,7 @@ Promise.all([
 
   json_with_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         json_with_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -110,7 +112,7 @@ Promise.all([
 
   cbor_no_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         cbor_no_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -118,7 +120,7 @@ Promise.all([
 
   cbor_with_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         cbor_with_compression.put(faker.name.findName(), faker.datatype.json())
       })
     })
@@ -126,7 +128,7 @@ Promise.all([
 
   string_no_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         string_no_compression.put(faker.name.findName(), faker.address.streetAddress())
       })
     })
@@ -134,7 +136,7 @@ Promise.all([
 
   string_with_compression
     .transactionAsync(() => {
-      Array.from({ length: 1000 }, () => {
+      Array.from({ length: arrayLength }, () => {
         string_with_compression.put(faker.name.findName(), faker.address.streetAddress())
       })
     })
