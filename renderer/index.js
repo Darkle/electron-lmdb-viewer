@@ -23,7 +23,6 @@ document.addEventListener('keyup', event => {
 
 const tdMouseEvents = cell => ({
   onclick: () => {
-    console.log('clicked')
     if (!userIsPressingCtrlKey) return
     api.copyToClipBoard(cell)
   },
