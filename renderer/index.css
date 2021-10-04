@@ -10,6 +10,10 @@ body {
   overflow-y: hidden;
 }
 
+.hide {
+  display: none !important;
+}
+
 #container {
   display: flex;
   height: 100%;
@@ -33,6 +37,14 @@ body {
 
 #compression-checkbox-container {
   margin-bottom: 0.7rem;
+}
+
+.note {
+  text-align: center;
+}
+
+.note:first-of-type {
+  margin-bottom: 0.5rem;
 }
 
 fieldset {
@@ -98,4 +110,71 @@ td.gridjs-td {
 
 td.gridjs-td[data-column-id='row'] {
   min-width: unset;
+}
+
+#largedb-loading-message {
+  display: flex;
+  align-items: center;
+}
+
+.spinner {
+  -webkit-animation: rotate 2s linear infinite;
+  animation: rotate 2s linear infinite;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  margin-left: 0.8rem;
+}
+
+.spinner .path {
+  stroke: #93bfec;
+  stroke-linecap: round;
+  -webkit-animation: dash 1.5s ease-in-out infinite;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@-webkit-keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
 }

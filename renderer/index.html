@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Electron LMDB Viewer</title>
+    <link rel="stylesheet" href="static/notie@4.3.1.min.css" />
     <link rel="stylesheet" href="static/spectre@0.5.9.css" />
     <link rel="stylesheet" href="static/mermaid.min.css" />
     <link rel="stylesheet" href="index.css" />
@@ -33,16 +34,21 @@
           <button id="db-select-button">Open DB</button>
           <span id="db-path-location"></span>
         </fieldset>
-        <p>
-          Note: You can ctrl-click on a key or value to copy it to the clipboard. Copying/Editing binary
-          key/values is currently not supported.
-        </p>
+        <p class="note">Note: You can ctrl-click on a key or value to copy it to the clipboard.</p>
+        <p class="note">Copying/Editing binary key/values is currently not supported.</p>
       </div>
       <div id="grid-container">
+        <p id="largedb-loading-message" class="hide">
+          <span>Loading DB, Please Wait</span
+          ><svg class="spinner" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+          </svg>
+        </p>
         <div id="grid-wrapper"></div>
       </div>
     </div>
     <script src="static/gridjs@5.0.2.min.js"></script>
+    <script src="static/notie@4.3.1.min.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

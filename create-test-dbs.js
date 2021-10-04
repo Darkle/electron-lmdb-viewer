@@ -75,7 +75,7 @@ let binary_with_compression = lmdb.open({
   encoding: 'binary',
 })
 
-const arrayLength = 50_000
+const arrayLength = 5000
 
 Promise.all([
   msgpack_no_compression

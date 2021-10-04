@@ -23,8 +23,10 @@ document.addEventListener('keyup', event => {
 
 const tdMouseEvents = {
   onclick: () => {
+    console.log('clicked')
     if (!userIsPressingCtrlKey) return
     api.copyToClipBoard(cell)
+    notie.alert({ type: 4, text: 'Copied to clipboard.', time: 2 })
   },
   onmouseenter: event => {
     if (!userIsPressingCtrlKey) return
@@ -77,7 +79,11 @@ $('#db-select-button').addEventListener('click', () => {
   const compression = $('#compression').checked
   const dbEncodingType = $('#database-encoding-type-select').value.trim()
 
+  $('#largedb-loading-message').classList.remove('hide')
+
   api.openNewDb(compression, dbEncodingType).then(dbData => {
+    $('#largedb-loading-message').classList.add('hide')
+
     if (!dbData || dbData instanceof Error) {
       return
     }
@@ -103,6 +109,7 @@ $('#db-select-button').addEventListener('click', () => {
         },
         server: false,
       }).render(document.getElementById('grid-wrapper'))
+
       return
     }
 
