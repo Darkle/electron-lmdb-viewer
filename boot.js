@@ -28,6 +28,7 @@ app.on('window-all-closed', () => {
 
 let db = null
 
+// eslint-disable-next-line max-lines-per-function,complexity
 ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
   try {
     const dbPath = await dialog

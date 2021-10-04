@@ -21,12 +21,11 @@ document.addEventListener('keyup', event => {
   }
 })
 
-const tdMouseEvents = {
+const tdMouseEvents = cell => ({
   onclick: () => {
     console.log('clicked')
     if (!userIsPressingCtrlKey) return
     api.copyToClipBoard(cell)
-    notie.alert({ type: 4, text: 'Copied to clipboard.', time: 2 })
   },
   onmouseenter: event => {
     if (!userIsPressingCtrlKey) return
@@ -42,7 +41,7 @@ const tdMouseEvents = {
       event.target.style.cursor = 'auto'
     }
   },
-}
+})
 
 const columns = [
   'Row',
@@ -50,7 +49,7 @@ const columns = [
     name: 'Key',
     attributes: cell => {
       if (cell) {
-        return tdMouseEvents
+        return tdMouseEvents(cell)
       }
     },
   },
@@ -58,7 +57,7 @@ const columns = [
     name: 'Value',
     attributes: cell => {
       if (cell) {
-        return tdMouseEvents
+        return tdMouseEvents(cell)
       }
     },
   },
@@ -75,12 +74,14 @@ function processDBData({ key, value }, index) {
   return [index + 1, key, value]
 }
 
+// eslint-disable-next-line max-lines-per-function
 $('#db-select-button').addEventListener('click', () => {
   const compression = $('#compression').checked
   const dbEncodingType = $('#database-encoding-type-select').value.trim()
 
   $('#largedb-loading-message').classList.remove('hide')
 
+  // eslint-disable-next-line max-lines-per-function
   api.openNewDb(compression, dbEncodingType).then(dbData => {
     $('#largedb-loading-message').classList.add('hide')
 
