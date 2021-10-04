@@ -72,7 +72,9 @@ function processDBData({ key, value }, index) {
     key = 'hex:' + value.toString('hex').slice(0, 100) + '...'
   }
 
-  return [index + 1, key, value]
+  const rowNumber = index + 1
+
+  return [rowNumber, key, value]
 }
 
 // eslint-disable-next-line max-lines-per-function
