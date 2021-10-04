@@ -8,12 +8,6 @@
     "create-test-dbs": "npm run reinstall-lmdb && node ./create-test-dbs.js && electron-rebuild",
     "start": "electron . --no-sandbox"
   },
-  "browserslist": [
-    "Firefox ESR",
-    "last 3 Chrome version",
-    "last 2 safari version",
-    "last 2 ios version"
-  ],
   "dependencies": {
     "electron": "^15.1.0",
     "gridjs": "^5.0.2",
