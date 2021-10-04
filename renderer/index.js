@@ -65,6 +65,7 @@ const columns = [
 
 function processDBData({ key, value }, index) {
   if (isBinaryBuffer(value)) {
+    // Cant show the whole hex, it'd be too big
     value = 'hex:' + value.toString('hex').slice(0, 100) + '...'
   }
   if (isBinaryBuffer(key)) {
