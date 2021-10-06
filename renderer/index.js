@@ -4,6 +4,8 @@ const $$ = q => Array.from(document.querySelectorAll(q))
 const $ = document.querySelector.bind(document)
 
 let grid = null
+let dbDataRenderStore = null
+let indexedDBData = null
 
 const isBinaryBuffer = val => val instanceof Uint8Array
 
@@ -21,10 +23,29 @@ document.addEventListener('keyup', event => {
   }
 })
 
+$('#dialog-close').addEventListener('click', () => {
+  $('#show-data-dialog>textarea').value = ''
+  $('#show-data-dialog').classList.add('hide')
+})
+
+// eslint-disable-next-line max-lines-per-function
 const tdMouseEvents = cell => ({
-  onclick: () => {
+  onclick: event => {
     if (!userIsPressingCtrlKey) return
-    api.copyToClipBoard(cell)
+
+    $('#show-data-dialog>textarea').value = ''
+
+    const type = event.target.dataset.columnId
+    const row = Number(event.target.parentNode.firstElementChild.textContent.trim()) - 1
+
+    let thingToShow = event.target.dataset.columnId === 'value' ? indexedDBData[row][1] : indexedDBData[row][0]
+
+    if (thingToShow instanceof Uint8Array) {
+      thingToShow = thingToShow.toString('hex')
+    }
+
+    $('#show-data-dialog').classList.remove('hide')
+    $('#show-data-dialog>textarea').value = thingToShow
   },
   onmouseenter: event => {
     if (!userIsPressingCtrlKey) return
@@ -62,6 +83,7 @@ const columns = [
   },
 ]
 
+// eslint-disable-next-line complexity
 function processDBData({ key, value }, index) {
   if (isBinaryBuffer(value)) {
     // Cant show the whole hex, it'd be too big
@@ -69,6 +91,12 @@ function processDBData({ key, value }, index) {
   }
   if (isBinaryBuffer(key)) {
     key = 'hex:' + value.toString('hex').slice(0, 100) + '...'
+  }
+  if (value.length > 100) {
+    value = value.slice(0, 100) + '...'
+  }
+  if (key.length > 100) {
+    key = key.slice(0, 100) + '...'
   }
 
   const rowNumber = index + 1
@@ -90,6 +118,17 @@ $('#db-select-button').addEventListener('click', () => {
     if (!dbData || dbData instanceof Error) {
       return
     }
+
+    dbDataRenderStore = null
+    indexedDBData = null
+
+    dbDataRenderStore = new Map()
+
+    dbData.items.forEach(({ key, value }) => {
+      dbDataRenderStore.set(key, value)
+    })
+
+    indexedDBData = [...dbDataRenderStore.entries()]
 
     $('#db-path-location').textContent = dbData.dbFilePath
 

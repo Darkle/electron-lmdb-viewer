@@ -33,10 +33,14 @@
           <button id="db-select-button">Open DB</button>
           <span id="db-path-location"></span>
         </fieldset>
-        <p class="note">Note: You can ctrl-click on a key or value to copy it to the clipboard.</p>
-        <p class="note">Copying binary key/values is currently not supported.</p>
+        <p class="note">Note: Ctrl-click on a key or value view in full.</p>
+        <p class="note">Binary key/values are converted to hex for viewing.</p>
       </div>
       <div id="grid-container">
+        <dialog id="show-data-dialog" class="hide">
+          <span id="dialog-close">✕</span>
+          <textarea rows="6"></textarea>
+        </dialog>
         <p id="largedb-loading-message" class="hide">
           <span>Loading DB, Please Wait</span
           ><svg class="spinner" viewBox="0 0 50 50">

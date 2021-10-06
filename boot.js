@@ -59,3 +59,5 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
     dialog.showErrorBox('Error Opening DB', err.toString() + additionalMessage)
   }
 })
+
+ipcMain.handle('get-key-value', (event, key) => db.get(key))

@@ -95,6 +95,26 @@ label[for='database-encoding-type-select'] {
   max-width: calc(100vw - 3rem - 220px);
 }
 
+#show-data-dialog {
+  z-index: 99;
+  width: 50vw;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.1rem;
+}
+
+#show-data-dialog > span {
+  align-self: end;
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+}
+
+#show-data-dialog > textarea {
+  width: 100%;
+  flex-grow: 1;
+}
+
 table.gridjs-table {
   /* width: calc(100vw - 3rem - 220px); */
   max-width: calc(100vw - 3rem - 220px);
