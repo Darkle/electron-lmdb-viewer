@@ -4,8 +4,8 @@
   "description": "",
   "main": "boot.js",
   "scripts": {
-    "dev": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js --watch",
-    "build": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js",
+    "dev": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js --watch --define:__VUE_OPTIONS_API__=\"true\" --define:__VUE_PROD_DEVTOOLS__=\"false\"",
+    "build": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js --define:__VUE_OPTIONS_API__=\"true\" --define:__VUE_PROD_DEVTOOLS__=\"false\"",
     "reinstall-lmdb": "npm uninstall lmdb lmdb-store && npm i lmdb lmdb-store",
     "create-test-dbs": "npm run reinstall-lmdb && node ./create-test-dbs.js && electron-rebuild",
     "start": "electron . --no-sandbox"
@@ -18,6 +18,7 @@
     "gridjs": "^5.0.2",
     "lmdb": "^1.6.8",
     "lmdb-store": "^1.6.8",
+    "lodash.debounce": "^4.0.8",
     "vue": "^3.2.23",
     "vue-good-table-next": "^0.1.0"
   },

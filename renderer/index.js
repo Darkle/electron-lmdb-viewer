@@ -1,8 +1,7 @@
 // @ts-nocheck
 import * as Vue from 'vue'
 import VueGoodTablePlugin from 'vue-good-table-next'
-
-const isBinaryBuffer = val => val instanceof Uint8Array
+import debounce from 'lodash.debounce'
 
 let userIsPressingCtrlKey = false
 
@@ -52,16 +51,32 @@ document.addEventListener('keyup', event => {
 //   },
 // })
 
-// eslint-disable-next-line complexity
-function processDBData({ key, value }) {
-  if (isBinaryBuffer(value)) {
-    value = 'hex:' + value.toString('hex')
-  }
-  if (isBinaryBuffer(key)) {
-    key = 'hex:' + value.toString('hex')
-  }
-  // Cant show the whole data in the table as some data might be huge.
-  // We show it all in the textarea popup on ctrl+click instead.
+const state = Vue.reactive({
+  dbCompression: false,
+  dbEncoding: 'msgpack',
+  showDataDialog: false,
+  dbDataRenderStore: null,
+  // dbDataIndexed: null,
+  dbFilePath: '',
+  searchTerm: '',
+  columns: [
+    {
+      label: 'Key',
+      field: 'key',
+    },
+    {
+      label: 'Value',
+      field: 'value',
+    },
+  ],
+  totalRows: 0,
+  rows: [],
+  currentPage: 1,
+})
+
+// Cant show the whole data in the table as some data might be huge.
+// We show it all in the textarea popup on ctrl+click instead.
+function trimDBDataForTableCell({ key, value }) {
   if (value.length > 100) {
     value = value.slice(0, 100) + '...'
   }
@@ -74,57 +89,77 @@ function processDBData({ key, value }) {
 
 const MainComponent = Vue.defineComponent({
   data() {
-    return {
-      dbCompression: false,
-      dbEncoding: 'msgpack',
-      loadingDB: false,
-      showDataDialog: false,
-      dbDataRenderStore: null,
-      // dbDataIndexed: null,
-      dbFilePath: '',
-      columns: [
-        {
-          label: 'Key',
-          field: 'key',
-        },
-        {
-          label: 'Value',
-          field: 'value',
-        },
-      ],
-      totalRecords: 0,
-      rows: [],
-    }
+    return { state }
+  },
+  created() {
+    const delay = 500
+    this['onSearch'] = debounce(({ searchTerm }) => {
+      state.searchTerm = searchTerm
+      console.log(state.searchTerm)
+    }, delay)
   },
   mount() {
     Array.from(document.querySelectorAll('.hide')).forEach(elem => elem.classList.remove('hide'))
   },
   methods: {
-    openDB() {
-      this.loadingDB = true
+    async openDB() {
+      const dbData = await api.openNewDb(state.dbCompression, state.dbEncoding).catch(err => err)
 
-      api.openNewDb(this.dbCompression, this.dbEncoding).then(dbData => {
-        this.loadingDB = false
+      if (dbData.userCancelledFileSelect) {
+        return
+      }
 
-        if (!dbData || dbData instanceof Error) {
-          return
-        }
+      if (dbData instanceof Error) {
+        alert(dbData)
+        return
+      }
 
-        this.dbDataRenderStore = new Map()
+      if (!dbData.items) {
+        alert('Did not find any data in db.')
+        return
+      }
 
-        dbData.items.forEach(({ key, value }) => {
-          this.dbDataRenderStore.set(key, value)
-        })
+      this.resetStateRowData()
 
-        // this.dbDataIndexed = [...this.dbDataRenderStore.entries()]
-        this.dbFilePath = dbData.dbFilePath
-        this.totalRecords = dbData.dbLength
-        this.rows = dbData.items.map(processDBData)
-        console.log(JSON.parse(JSON.stringify(this.rows)))
+      state.dbDataRenderStore = new Map()
+
+      dbData.items.forEach(({ key, value }) => {
+        state.dbDataRenderStore.set(key, value)
       })
+
+      console.log(`DB total size: ${dbData.totalRows} items`)
+      console.log('Initial page of db items:', dbData.items)
+
+      state.dbFilePath = dbData.dbFilePath
+
+      // state.dbDataIndexed = [...state.dbDataRenderStore.entries()]
+      state.rows = dbData.items.map(trimDBDataForTableCell)
+      state.totalRows = dbData.totalRows
+    },
+    async onPageChange(params) {
+      state.currentPage = params.currentPage
+
+      const pageOfDbData = await api
+        .retrievePageOfDBItems(state.currentPage)
+        .then(items => items.map(trimDBDataForTableCell))
+
+      console.log('Page of db items:', pageOfDbData)
+
+      state.rows = pageOfDbData
+
+      this.scrollTableToTop()
+    },
+    resetStateRowData() {
+      state.rows = []
+      state.totalRows = 0
+      state.currentPage = 1
+    },
+    scrollTableToTop() {
+      const tableContainer = document.querySelector('.vgt-responsive')
+      tableContainer.scrollTop = 0
     },
     closeDialog() {
-      this.showDataDialog = false
+      state.showDataDialog = false
       this.$refs.textarea.value = ''
     },
   },

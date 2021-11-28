@@ -72,8 +72,6 @@ label[for='database-encoding-type-select'] {
 
 #db-path-location {
   margin-top: 0.8rem;
-
-  /* width: 300px; */
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
@@ -81,18 +79,6 @@ label[for='database-encoding-type-select'] {
 
 #db-select-button {
   max-width: 6rem;
-}
-
-/* #grid-container {
-   width: 100%;
-  max-width: 80vw;
-  justify-content: center;
-  display: flex;
-} */
-
-#grid-wrapper {
-  /* width: calc(100vw - 3rem - 220px);
-  max-width: calc(100vw - 3rem - 220px); */
 }
 
 #show-data-dialog {
@@ -115,25 +101,8 @@ label[for='database-encoding-type-select'] {
   flex-grow: 1;
 }
 
-/* table.gridjs-table {
-  max-width: calc(100vw - 3rem - 220px);
-}
-
-.gridjs-wrapper {
-  height: calc(100vh - 10.2em);
-}
-
-td.gridjs-td {
-  min-width: 180px;
-}
-
-td.gridjs-td[data-column-id='row'] {
-  min-width: unset;
-} */
-
-#largedb-loading-message {
-  display: flex;
-  align-items: center;
+.vgt-wrap__footer * {
+  font-size: 0.8rem !important;
 }
 
 .spinner {

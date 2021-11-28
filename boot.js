@@ -28,11 +28,36 @@ app.on('window-all-closed', () => {
 
 let db = null
 
-function retrievePageOfDBItems(offset) {
-  return [...db.getRange({ offset, limit: 500 })].map()
+const numItemsPerPage = 500
+
+const isBinaryBuffer = val => val instanceof Uint8Array
+
+function convertBinaryDataToHexString({ key, value }) {
+  if (isBinaryBuffer(value)) {
+    value = 'hex:' + value.toString('hex')
+  }
+  if (isBinaryBuffer(key)) {
+    key = 'hex:' + value.toString('hex')
+  }
+  return { key, value }
 }
 
-ipcMain.handle('retrieve-page-of-db-items', (event, offset) => retrievePageOfDBItems(offset))
+const dbCache = {
+  get totalRows() {
+    return this.items.length
+  },
+  items: [],
+  getPageOfDBItems(offset = 0) {
+    const indexStart = offset === 0 ? offset : offset - 1
+    const indexEnd = indexStart + numItemsPerPage
+    return this.items.slice(indexStart, indexEnd).map(convertBinaryDataToHexString)
+  },
+}
+
+ipcMain.handle('retrieve-page-of-db-items', (event, page) => {
+  const offset = (page - 1) * numItemsPerPage
+  return dbCache.getPageOfDBItems(offset)
+})
 
 // eslint-disable-next-line max-lines-per-function,complexity
 ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
@@ -43,17 +68,17 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
       .catch(err => console.error(err))
 
     // User has cancelled file select dialog
-    if (!dbPath) return
+    if (!dbPath) return { userCancelledFileSelect: true }
 
     if (db) db.close()
 
     db = lmdb.open(dbPath, { compression, encoding: dbEncodingType })
 
-    const dbLength = [...db.getKeys()].length
+    dbCache.items = [...db.getRange()]
 
-    const dbFirstPageOfItems = [...db.getRange({ limit: 500 })]
+    const dbFirstPageOfDBItems = dbCache.getPageOfDBItems()
 
-    return { items: dbFirstPageOfItems, dbFilePath: dbPath, dbLength }
+    return { items: dbFirstPageOfDBItems, dbFilePath: dbPath, totalRows: dbCache.totalRows }
   } catch (err) {
     console.error(err)
 
