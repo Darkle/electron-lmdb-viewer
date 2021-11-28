@@ -108,7 +108,10 @@ const MainComponent = Vue.defineComponent({
 
           this.scrollTableToTop()
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+          console.error(err)
+          alert(err.toString())
+        })
     }, delay)
   },
   mount() {
@@ -123,7 +126,7 @@ const MainComponent = Vue.defineComponent({
       }
 
       if (dbData instanceof Error) {
-        alert(dbData)
+        alert(dbData.toString())
         return
       }
 
@@ -149,21 +152,25 @@ const MainComponent = Vue.defineComponent({
       state.rows = dbData.items.map(trimDBDataForTableCell)
       state.totalRows = dbData.totalRows
     },
-    async onPageChange(params) {
+    onPageChange(params) {
       state.currentPage = params.currentPage
 
       const searchTerm = state.searchTerm.length > 0 ? state.searchTerm : null
 
-      const pageOfDbData = await api
+      api
         .retrievePageOfDBItems(state.currentPage, searchTerm)
         .then(items => items.map(trimDBDataForTableCell))
-        .catch(err => console.error(err))
+        .then(pageOfDbData => {
+          console.log('Page of db items:', pageOfDbData)
 
-      console.log('Page of db items:', pageOfDbData)
+          state.rows = pageOfDbData
 
-      state.rows = pageOfDbData
-
-      this.scrollTableToTop()
+          this.scrollTableToTop()
+        })
+        .catch(err => {
+          console.error(err)
+          alert(err.toString())
+        })
     },
     resetStateRowData() {
       state.rows = []
