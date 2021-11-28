@@ -74,7 +74,7 @@ const state = Vue.reactive({
   currentPage: 1,
 })
 
-// Cant show the whole data in the table as some data might be huge.
+// Cant show the whole data in the table cell as some data might be huge.
 // We show it all in the textarea popup on ctrl+click instead.
 function trimDBDataForTableCell({ key, value }) {
   if (value.length > 100) {
@@ -98,10 +98,11 @@ const MainComponent = Vue.defineComponent({
 
       console.log(state.searchTerm)
 
-      api.searchDb(searchTerm, state.currentPage).then(pageOfDbData => {
-        console.log('Page of db items:', pageOfDbData)
+      api.searchDb(searchTerm, state.currentPage).then(({ totalResultCount, searchResultsPageChunk }) => {
+        console.log('Page of db items:', searchResultsPageChunk)
 
-        state.rows = pageOfDbData.map(trimDBDataForTableCell)
+        state.rows = searchResultsPageChunk.map(trimDBDataForTableCell)
+        state.totalRows = totalResultCount
 
         this.scrollTableToTop()
       })

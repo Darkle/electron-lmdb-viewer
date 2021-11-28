@@ -19546,9 +19546,10 @@ var MainComponent = defineComponent({
     this["onSearch"] = (0, import_lodash.default)(({ searchTerm }) => {
       state.searchTerm = searchTerm;
       console.log(state.searchTerm);
-      api.searchDb(searchTerm, state.currentPage).then((pageOfDbData) => {
-        console.log("Page of db items:", pageOfDbData);
-        state.rows = pageOfDbData.map(trimDBDataForTableCell);
+      api.searchDb(searchTerm, state.currentPage).then(({ totalResultCount, searchResultsPageChunk }) => {
+        console.log("Page of db items:", searchResultsPageChunk);
+        state.rows = searchResultsPageChunk.map(trimDBDataForTableCell);
+        state.totalRows = totalResultCount;
         this.scrollTableToTop();
       });
     }, delay);

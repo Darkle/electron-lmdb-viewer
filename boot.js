@@ -57,24 +57,25 @@ const dbCache = {
     const indexStart = offset === 0 ? offset : offset - 1
     const indexEnd = indexStart + numItemsPerPage
     // This could prolly be improved
-    return this.items
-      .filter(({ key, value }) => {
-        try {
-          if (isBinaryBuffer(value)) {
-            value = 'hex:' + value.toString('hex')
-          } else if (isBinaryBuffer(key)) {
-            key = 'hex:' + value.toString('hex')
-          } else {
-            value = value.toString()
-            key = key.toString()
-          }
-          return key.includes(searchTerm) || value.includes(searchTerm)
-        } catch (err) {
-          console.error(err)
-          return false
+    const searchResults = this.items.filter(({ key, value }) => {
+      try {
+        if (isBinaryBuffer(value)) {
+          value = 'hex:' + value.toString('hex')
+        } else if (isBinaryBuffer(key)) {
+          key = 'hex:' + value.toString('hex')
+        } else {
+          value = value.toString()
+          key = key.toString()
         }
-      })
-      .slice(indexStart, indexEnd)
+        return key.includes(searchTerm) || value.includes(searchTerm)
+      } catch (err) {
+        console.error(err)
+        return false
+      }
+    })
+    const searchResultsPageChunk = searchResults.slice(indexStart, indexEnd)
+
+    return { totalResultCount: searchResults.length, searchResultsPageChunk }
   },
 }
 
