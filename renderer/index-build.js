@@ -19551,7 +19551,7 @@ var MainComponent = defineComponent({
         state.rows = searchResultsPageChunk.map(trimDBDataForTableCell);
         state.totalRows = totalResultCount;
         this.scrollTableToTop();
-      });
+      }).catch((err) => console.error(err));
     }, delay);
   },
   mount() {
@@ -19585,7 +19585,7 @@ var MainComponent = defineComponent({
     async onPageChange(params) {
       state.currentPage = params.currentPage;
       const searchTerm = state.searchTerm.length > 0 ? state.searchTerm : null;
-      const pageOfDbData = await api.retrievePageOfDBItems(state.currentPage, searchTerm).then((items) => items.map(trimDBDataForTableCell));
+      const pageOfDbData = await api.retrievePageOfDBItems(state.currentPage, searchTerm).then((items) => items.map(trimDBDataForTableCell)).catch((err) => console.error(err));
       console.log("Page of db items:", pageOfDbData);
       state.rows = pageOfDbData;
       this.scrollTableToTop();

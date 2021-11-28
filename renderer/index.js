@@ -98,14 +98,17 @@ const MainComponent = Vue.defineComponent({
 
       console.log(state.searchTerm)
 
-      api.searchDb(searchTerm, state.currentPage).then(({ totalResultCount, searchResultsPageChunk }) => {
-        console.log('Page of db items:', searchResultsPageChunk)
+      api
+        .searchDb(searchTerm, state.currentPage)
+        .then(({ totalResultCount, searchResultsPageChunk }) => {
+          console.log('Page of db items:', searchResultsPageChunk)
 
-        state.rows = searchResultsPageChunk.map(trimDBDataForTableCell)
-        state.totalRows = totalResultCount
+          state.rows = searchResultsPageChunk.map(trimDBDataForTableCell)
+          state.totalRows = totalResultCount
 
-        this.scrollTableToTop()
-      })
+          this.scrollTableToTop()
+        })
+        .catch(err => console.error(err))
     }, delay)
   },
   mount() {
@@ -154,6 +157,7 @@ const MainComponent = Vue.defineComponent({
       const pageOfDbData = await api
         .retrievePageOfDBItems(state.currentPage, searchTerm)
         .then(items => items.map(trimDBDataForTableCell))
+        .catch(err => console.error(err))
 
       console.log('Page of db items:', pageOfDbData)
 
