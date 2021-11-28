@@ -4,19 +4,27 @@
   "description": "",
   "main": "boot.js",
   "scripts": {
+    "dev": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js --watch",
+    "build": "esbuild renderer/index.js --bundle --format=esm --platform=browser --outfile=renderer/index-build.js",
     "reinstall-lmdb": "npm uninstall lmdb lmdb-store && npm i lmdb lmdb-store",
     "create-test-dbs": "npm run reinstall-lmdb && node ./create-test-dbs.js && electron-rebuild",
     "start": "electron . --no-sandbox"
+  },
+  "browser": {
+    "vue": "vue/dist/vue.esm-bundler.js"
   },
   "dependencies": {
     "electron": "^15.1.0",
     "gridjs": "^5.0.2",
     "lmdb": "^1.6.8",
-    "lmdb-store": "^1.6.8"
+    "lmdb-store": "^1.6.8",
+    "vue": "^3.2.23",
+    "vue-good-table-next": "^0.1.0"
   },
   "devDependencies": {
     "cbor-x": "^0.8.3",
     "electron-rebuild": "^3.2.3",
+    "esbuild": "^0.14.0",
     "eslint": "^7.32.0",
     "faker": "^5.5.3",
     "js-image-generator": "^1.0.3",

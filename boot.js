@@ -28,6 +28,12 @@ app.on('window-all-closed', () => {
 
 let db = null
 
+function retrievePageOfDBItems(offset) {
+  return [...db.getRange({ offset, limit: 500 })].map()
+}
+
+ipcMain.handle('retrieve-page-of-db-items', (event, offset) => retrievePageOfDBItems(offset))
+
 // eslint-disable-next-line max-lines-per-function,complexity
 ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
   try {
@@ -43,11 +49,11 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
 
     db = lmdb.open(dbPath, { compression, encoding: dbEncodingType })
 
-    const dbItems = []
+    const dbLength = [...db.getKeys()].length
 
-    db.getRange().forEach(item => dbItems.push(item))
+    const dbFirstPageOfItems = [...db.getRange({ limit: 500 })]
 
-    return { items: dbItems, dbFilePath: dbPath }
+    return { items: dbFirstPageOfItems, dbFilePath: dbPath, dbLength }
   } catch (err) {
     console.error(err)
 
@@ -59,5 +65,3 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
     dialog.showErrorBox('Error Opening DB', err.toString() + additionalMessage)
   }
 })
-
-ipcMain.handle('get-key-value', (event, key) => db.get(key))

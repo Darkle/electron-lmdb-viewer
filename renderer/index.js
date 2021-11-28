@@ -1,11 +1,6 @@
 // @ts-nocheck
-
-const $$ = q => Array.from(document.querySelectorAll(q))
-const $ = document.querySelector.bind(document)
-
-let grid = null
-let dbDataRenderStore = null
-let indexedDBData = null
+import * as Vue from 'vue'
+import VueGoodTablePlugin from 'vue-good-table-next'
 
 const isBinaryBuffer = val => val instanceof Uint8Array
 
@@ -23,75 +18,50 @@ document.addEventListener('keyup', event => {
   }
 })
 
-$('#dialog-close').addEventListener('click', () => {
-  $('#show-data-dialog>textarea').value = ''
-  $('#show-data-dialog').classList.add('hide')
-})
+// const tdMouseEvents = cell => ({
+//   onclick: event => {
+//     if (!userIsPressingCtrlKey) return
 
-// eslint-disable-next-line max-lines-per-function
-const tdMouseEvents = cell => ({
-  onclick: event => {
-    if (!userIsPressingCtrlKey) return
+//     $('#show-data-dialog>textarea').value = ''
 
-    $('#show-data-dialog>textarea').value = ''
+//     const type = event.target.dataset.columnId
+//     const row = Number(event.target.parentNode.firstElementChild.textContent.trim()) - 1
 
-    const type = event.target.dataset.columnId
-    const row = Number(event.target.parentNode.firstElementChild.textContent.trim()) - 1
+//     let thingToShow = event.target.dataset.columnId === 'value' ? indexedDBData[row][1] : indexedDBData[row][0]
 
-    let thingToShow = event.target.dataset.columnId === 'value' ? indexedDBData[row][1] : indexedDBData[row][0]
+//     if (thingToShow instanceof Uint8Array) {
+//       thingToShow = thingToShow.toString('hex')
+//     }
 
-    if (thingToShow instanceof Uint8Array) {
-      thingToShow = thingToShow.toString('hex')
-    }
-
-    $('#show-data-dialog').classList.remove('hide')
-    $('#show-data-dialog>textarea').value = thingToShow
-  },
-  onmouseenter: event => {
-    if (!userIsPressingCtrlKey) return
-    event.target.style.cursor = 'pointer'
-  },
-  onmouseleave: event => {
-    event.target.style.cursor = 'auto'
-  },
-  onmousemove: event => {
-    if (userIsPressingCtrlKey) {
-      event.target.style.cursor = 'pointer'
-    } else {
-      event.target.style.cursor = 'auto'
-    }
-  },
-})
-
-const columns = [
-  'Row',
-  {
-    name: 'Key',
-    attributes: cell => {
-      if (cell) {
-        return tdMouseEvents(cell)
-      }
-    },
-  },
-  {
-    name: 'Value',
-    attributes: cell => {
-      if (cell) {
-        return tdMouseEvents(cell)
-      }
-    },
-  },
-]
+//     $('#show-data-dialog').classList.remove('hide')
+//     $('#show-data-dialog>textarea').value = thingToShow
+//   },
+//   onmouseenter: event => {
+//     if (!userIsPressingCtrlKey) return
+//     event.target.style.cursor = 'pointer'
+//   },
+//   onmouseleave: event => {
+//     event.target.style.cursor = 'auto'
+//   },
+//   onmousemove: event => {
+//     if (userIsPressingCtrlKey) {
+//       event.target.style.cursor = 'pointer'
+//     } else {
+//       event.target.style.cursor = 'auto'
+//     }
+//   },
+// })
 
 // eslint-disable-next-line complexity
-function processDBData({ key, value }, index) {
+function processDBData({ key, value }) {
   if (isBinaryBuffer(value)) {
-    // Cant show the whole hex, it'd be too big
-    value = 'hex:' + value.toString('hex').slice(0, 100) + '...'
+    value = 'hex:' + value.toString('hex')
   }
   if (isBinaryBuffer(key)) {
-    key = 'hex:' + value.toString('hex').slice(0, 100) + '...'
+    key = 'hex:' + value.toString('hex')
   }
+  // Cant show the whole data in the table as some data might be huge.
+  // We show it all in the textarea popup on ctrl+click instead.
   if (value.length > 100) {
     value = value.slice(0, 100) + '...'
   }
@@ -99,67 +69,65 @@ function processDBData({ key, value }, index) {
     key = key.slice(0, 100) + '...'
   }
 
-  const rowNumber = index + 1
-
-  return [rowNumber, key, value]
+  return { key, value }
 }
 
-// eslint-disable-next-line max-lines-per-function
-$('#db-select-button').addEventListener('click', () => {
-  const compression = $('#compression').checked
-  const dbEncodingType = $('#database-encoding-type-select').value.trim()
-
-  $('#largedb-loading-message').classList.remove('hide')
-
-  // eslint-disable-next-line max-lines-per-function
-  api.openNewDb(compression, dbEncodingType).then(dbData => {
-    $('#largedb-loading-message').classList.add('hide')
-
-    if (!dbData || dbData instanceof Error) {
-      return
-    }
-
-    dbDataRenderStore = null
-    indexedDBData = null
-
-    dbDataRenderStore = new Map()
-
-    dbData.items.forEach(({ key, value }) => {
-      dbDataRenderStore.set(key, value)
-    })
-
-    indexedDBData = [...dbDataRenderStore.entries()]
-
-    $('#db-path-location').textContent = dbData.dbFilePath
-
-    const data = dbData.items.map(processDBData)
-
-    if (!grid) {
-      grid = new gridjs.Grid({
-        columns: columns,
-        data,
-        search: true,
-        height: 'calc(100vh - 10.2em)',
-        pagination: {
-          enabled: true,
-          limit: 500,
+const MainComponent = Vue.defineComponent({
+  data() {
+    return {
+      dbCompression: false,
+      dbEncoding: 'msgpack',
+      loadingDB: false,
+      showDataDialog: false,
+      dbDataRenderStore: null,
+      // dbDataIndexed: null,
+      dbFilePath: '',
+      columns: [
+        {
+          label: 'Key',
+          field: 'key',
         },
-        language: {
-          search: {
-            placeholder: 'Search...',
-          },
+        {
+          label: 'Value',
+          field: 'value',
         },
-        server: false,
-      }).render(document.getElementById('grid-wrapper'))
-
-      return
+      ],
+      totalRecords: 0,
+      rows: [],
     }
+  },
+  mount() {
+    Array.from(document.querySelectorAll('.hide')).forEach(elem => elem.classList.remove('hide'))
+  },
+  methods: {
+    openDB() {
+      this.loadingDB = true
 
-    grid
-      .updateConfig({
-        columns: columns,
-        data,
+      api.openNewDb(this.dbCompression, this.dbEncoding).then(dbData => {
+        this.loadingDB = false
+
+        if (!dbData || dbData instanceof Error) {
+          return
+        }
+
+        this.dbDataRenderStore = new Map()
+
+        dbData.items.forEach(({ key, value }) => {
+          this.dbDataRenderStore.set(key, value)
+        })
+
+        // this.dbDataIndexed = [...this.dbDataRenderStore.entries()]
+        this.dbFilePath = dbData.dbFilePath
+        this.totalRecords = dbData.dbLength
+        this.rows = dbData.items.map(processDBData)
+        console.log(JSON.parse(JSON.stringify(this.rows)))
       })
-      .forceRender()
-  })
+    },
+    closeDialog() {
+      this.showDataDialog = false
+      this.$refs.textarea.value = ''
+    },
+  },
 })
+
+Vue.createApp(MainComponent).use(VueGoodTablePlugin).mount('#container')

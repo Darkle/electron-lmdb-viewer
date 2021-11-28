@@ -11,7 +11,8 @@ module.exports = {
   },
   globals: {
     api: 'readonly',
-    gridjs: 'readonly',
+    Vue: 'readonly',
+    VueGoodTable: 'readonly',
   },
   env: {
     browser: true,
@@ -36,7 +37,6 @@ module.exports = {
     'implicit-arrow-linebreak': 'off',
     indent: 'off',
     'max-depth': ['error', 3],
-    'max-lines-per-function': ['error', { max: 22, skipComments: true }],
     'max-len': 'off',
     'max-params': ['error', 4],
     'max-statements-per-line': ['error', { max: 1 }],

@@ -91,8 +91,8 @@ label[for='database-encoding-type-select'] {
 } */
 
 #grid-wrapper {
-  width: calc(100vw - 3rem - 220px);
-  max-width: calc(100vw - 3rem - 220px);
+  /* width: calc(100vw - 3rem - 220px);
+  max-width: calc(100vw - 3rem - 220px); */
 }
 
 #show-data-dialog {
@@ -115,8 +115,7 @@ label[for='database-encoding-type-select'] {
   flex-grow: 1;
 }
 
-table.gridjs-table {
-  /* width: calc(100vw - 3rem - 220px); */
+/* table.gridjs-table {
   max-width: calc(100vw - 3rem - 220px);
 }
 
@@ -130,7 +129,7 @@ td.gridjs-td {
 
 td.gridjs-td[data-column-id='row'] {
   min-width: unset;
-}
+} */
 
 #largedb-loading-message {
   display: flex;

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Electron LMDB Viewer</title>
     <link rel="stylesheet" href="static/spectre@0.5.9.css" />
-    <link rel="stylesheet" href="static/mermaid.min.css" />
+    <link rel="stylesheet" href="static/vue-good-table-next@0.1.0.css" />
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
@@ -15,12 +15,12 @@
         <fieldset id="settings-container">
           <legend>DB settings:</legend>
           <div id="compression-checkbox-container">
-            <input type="checkbox" id="compression" name="compression" />
+            <input v-model="dbCompression" type="checkbox" id="compression" name="compression" />
             <label for="compression">Compression</label>
           </div>
 
           <label for="database-encoding-type-select">DB Encoding Type</label>
-          <select name="database-encoding-type-select" id="database-encoding-type-select">
+          <select v-model="dbEncoding" name="database-encoding-type-select" id="database-encoding-type-select">
             <option value="msgpack">msgpack</option>
             <option value="cbor">cbor</option>
             <option value="json">json</option>
@@ -30,27 +30,42 @@
         </fieldset>
         <fieldset id="db-file-container">
           <legend>DB File:</legend>
-          <button id="db-select-button">Open DB</button>
-          <span id="db-path-location"></span>
+          <button id="db-select-button" @click="openDB">Open DB</button>
+          <span id="db-path-location">{{ dbFilePath }}</span>
         </fieldset>
-        <p class="note">Note: Ctrl-click on a key or value view in full.</p>
+        <p class="note">Note: Ctrl-click on a key or value to view in full.</p>
         <p class="note">Binary keys/values are converted to hex for viewing.</p>
       </div>
       <div id="grid-container">
-        <dialog id="show-data-dialog" class="hide">
-          <span id="dialog-close">✕</span>
-          <textarea rows="6"></textarea>
+        <dialog id="show-data-dialog" v-if="showDataDialog" class="hide">
+          <span id="dialog-close" @click="closeDialog">✕</span>
+          <textarea rows="6" ref="textarea"></textarea>
         </dialog>
-        <p id="largedb-loading-message" class="hide">
+        <p id="largedb-loading-message" v-if="loadingDB" class="hide">
           <span>Loading DB, Please Wait</span
           ><svg class="spinner" viewBox="0 0 50 50">
             <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
           </svg>
         </p>
-        <div id="grid-wrapper"></div>
+        <div id="grid-wrapper">
+          <vue-good-table
+            mode="remote"
+            :columns="columns"
+            :rows="rows"
+            :line-numbers="true"
+            :pagination-options="{
+              enabled: true,
+              mode: 'pages',
+              perPage: 500,
+              perPageDropdownEnabled: false,
+            }"
+            :sort-options="{
+              enabled: false,
+            }"
+          />
+        </div>
       </div>
     </div>
-    <script src="static/gridjs@5.0.2.min.js"></script>
-    <script src="index.js"></script>
+    <script src="index-build.js" type="module"></script>
   </body>
 </html>
