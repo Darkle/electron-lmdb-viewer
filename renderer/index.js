@@ -28,10 +28,6 @@ document.addEventListener('keyup', event => {
 
 //     let thingToShow = event.target.dataset.columnId === 'value' ? indexedDBData[row][1] : indexedDBData[row][0]
 
-//     if (thingToShow instanceof Uint8Array) {
-//       thingToShow = thingToShow.toString('hex')
-//     }
-
 //     $('#show-data-dialog').classList.remove('hide')
 //     $('#show-data-dialog>textarea').value = thingToShow
 //   },

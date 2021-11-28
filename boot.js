@@ -31,6 +31,9 @@ let db = null
 const numItemsPerPage = 500
 
 const isBinaryBuffer = val => val instanceof Uint8Array
+const isNotBinaryBuffer = val => !isBinaryBuffer(val)
+const isString = val => typeof val === 'string'
+const isNotString = val => !isString(val)
 
 // Its way faster to do this on the backend as opposed to in the renderer.
 function convertAnyBinaryDataToHexString({ key, value }) {
@@ -54,25 +57,41 @@ const dbCache = {
     return this.items.slice(indexStart, indexEnd).map(convertAnyBinaryDataToHexString)
   },
   search(searchTerm, offset) {
+    searchTerm = searchTerm.toLowerCase()
     const indexStart = offset === 0 ? offset : offset - 1
     const indexEnd = indexStart + numItemsPerPage
     // This could prolly be improved
     const searchResults = this.items.filter(({ key, value }) => {
       try {
-        if (isBinaryBuffer(value)) {
-          value = 'hex:' + value.toString('hex')
-        } else if (isBinaryBuffer(key)) {
-          key = 'hex:' + value.toString('hex')
-        } else {
-          value = value.toString()
+        // Note: These conversions are just for the searching, so we can search by string.
+        // if (isBinaryBuffer(key)) {
+        // If they wanted to search binary, would they want to search by hex or would we assume its text in binary form and use TextDecoder? I guess could add a checkbox or summin to the search.
+        //   key = new TextDecoder('utf-8').decode(key)
+        // }
+        // if (isBinaryBuffer(value)) {
+        //   value = new TextDecoder('utf-8').decode(value)
+        // }
+        // Ignoring binary for now
+        if (isNotString(key) && isNotBinaryBuffer(key)) {
           key = key.toString()
         }
-        return key.includes(searchTerm) || value.includes(searchTerm)
+        if (isNotString(value) && isNotBinaryBuffer(value)) {
+          value = value.toString()
+        }
+        if (isString(key) && key.toLowerCase().includes(searchTerm)) {
+          return true
+        }
+        if (isString(value) && value.toLowerCase().includes(searchTerm)) {
+          return true
+        }
+
+        return false
       } catch (err) {
         console.error(err)
         return false
       }
     })
+
     const searchResultsPageChunk = searchResults.slice(indexStart, indexEnd)
 
     return { totalResultCount: searchResults.length, searchResultsPageChunk }
