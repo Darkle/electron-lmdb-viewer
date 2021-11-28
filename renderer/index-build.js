@@ -19511,7 +19511,6 @@ var state = reactive({
   dbCompression: false,
   dbEncoding: "msgpack",
   showDataDialog: false,
-  dbDataRenderStore: null,
   dbFilePath: "",
   searchTerm: "",
   columns: [
@@ -19575,10 +19574,6 @@ var MainComponent = defineComponent({
         return;
       }
       this.resetStateRowData();
-      state.dbDataRenderStore = /* @__PURE__ */ new Map();
-      dbData.items.forEach(({ key, value }) => {
-        state.dbDataRenderStore.set(key, value);
-      });
       console.log(`DB total size: ${dbData.totalRows} items`);
       console.log("Initial page of db items:", dbData.items);
       state.dbFilePath = dbData.dbFilePath;

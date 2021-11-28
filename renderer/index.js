@@ -55,8 +55,6 @@ const state = Vue.reactive({
   dbCompression: false,
   dbEncoding: 'msgpack',
   showDataDialog: false,
-  dbDataRenderStore: null,
-  // dbDataIndexed: null,
   dbFilePath: '',
   searchTerm: '',
   columns: [
@@ -137,18 +135,11 @@ const MainComponent = Vue.defineComponent({
 
       this.resetStateRowData()
 
-      state.dbDataRenderStore = new Map()
-
-      dbData.items.forEach(({ key, value }) => {
-        state.dbDataRenderStore.set(key, value)
-      })
-
       console.log(`DB total size: ${dbData.totalRows} items`)
       console.log('Initial page of db items:', dbData.items)
 
       state.dbFilePath = dbData.dbFilePath
 
-      // state.dbDataIndexed = [...state.dbDataRenderStore.entries()]
       state.rows = dbData.items.map(trimDBDataForTableCell)
       state.totalRows = dbData.totalRows
     },
