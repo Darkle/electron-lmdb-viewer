@@ -32,7 +32,8 @@ const numItemsPerPage = 500
 
 const isBinaryBuffer = val => val instanceof Uint8Array
 
-function convertBinaryDataToHexString({ key, value }) {
+// Its way faster to do this on the backend as opposed to in the renderer.
+function convertAnyBinaryDataToHexString({ key, value }) {
   if (isBinaryBuffer(value)) {
     value = 'hex:' + value.toString('hex')
   }
@@ -50,13 +51,41 @@ const dbCache = {
   getPageOfDBItems(offset = 0) {
     const indexStart = offset === 0 ? offset : offset - 1
     const indexEnd = indexStart + numItemsPerPage
-    return this.items.slice(indexStart, indexEnd).map(convertBinaryDataToHexString)
+    return this.items.slice(indexStart, indexEnd).map(convertAnyBinaryDataToHexString)
+  },
+  search(searchTerm, offset) {
+    const indexStart = offset === 0 ? offset : offset - 1
+    const indexEnd = indexStart + numItemsPerPage
+    // This could prolly be improved
+    return this.items
+      .filter(({ key, value }) => {
+        try {
+          if (isBinaryBuffer(value)) {
+            value = 'hex:' + value.toString('hex')
+          } else if (isBinaryBuffer(key)) {
+            key = 'hex:' + value.toString('hex')
+          } else {
+            value = value.toString()
+            key = key.toString()
+          }
+          return key.includes(searchTerm) || value.includes(searchTerm)
+        } catch (err) {
+          console.error(err)
+          return false
+        }
+      })
+      .slice(indexStart, indexEnd)
   },
 }
 
 ipcMain.handle('retrieve-page-of-db-items', (event, page) => {
   const offset = (page - 1) * numItemsPerPage
   return dbCache.getPageOfDBItems(offset)
+})
+
+ipcMain.handle('search-db', (event, searchTerm, page) => {
+  const offset = (page - 1) * numItemsPerPage
+  return dbCache.search(searchTerm, offset)
 })
 
 // eslint-disable-next-line max-lines-per-function,complexity

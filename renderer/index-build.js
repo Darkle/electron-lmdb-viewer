@@ -19546,6 +19546,11 @@ var MainComponent = defineComponent({
     this["onSearch"] = (0, import_lodash.default)(({ searchTerm }) => {
       state.searchTerm = searchTerm;
       console.log(state.searchTerm);
+      api.searchDb(searchTerm, state.currentPage).then((pageOfDbData) => {
+        console.log("Page of db items:", pageOfDbData);
+        state.rows = pageOfDbData.map(trimDBDataForTableCell);
+        this.scrollTableToTop();
+      });
     }, delay);
   },
   mount() {
@@ -19578,7 +19583,8 @@ var MainComponent = defineComponent({
     },
     async onPageChange(params) {
       state.currentPage = params.currentPage;
-      const pageOfDbData = await api.retrievePageOfDBItems(state.currentPage).then((items) => items.map(trimDBDataForTableCell));
+      const searchTerm = state.searchTerm.length > 0 ? state.searchTerm : null;
+      const pageOfDbData = await api.retrievePageOfDBItems(state.currentPage, searchTerm).then((items) => items.map(trimDBDataForTableCell));
       console.log("Page of db items:", pageOfDbData);
       state.rows = pageOfDbData;
       this.scrollTableToTop();

@@ -95,7 +95,16 @@ const MainComponent = Vue.defineComponent({
     const delay = 500
     this['onSearch'] = debounce(({ searchTerm }) => {
       state.searchTerm = searchTerm
+
       console.log(state.searchTerm)
+
+      api.searchDb(searchTerm, state.currentPage).then(pageOfDbData => {
+        console.log('Page of db items:', pageOfDbData)
+
+        state.rows = pageOfDbData.map(trimDBDataForTableCell)
+
+        this.scrollTableToTop()
+      })
     }, delay)
   },
   mount() {
@@ -139,8 +148,10 @@ const MainComponent = Vue.defineComponent({
     async onPageChange(params) {
       state.currentPage = params.currentPage
 
+      const searchTerm = state.searchTerm.length > 0 ? state.searchTerm : null
+
       const pageOfDbData = await api
-        .retrievePageOfDBItems(state.currentPage)
+        .retrievePageOfDBItems(state.currentPage, searchTerm)
         .then(items => items.map(trimDBDataForTableCell))
 
       console.log('Page of db items:', pageOfDbData)
