@@ -40,9 +40,9 @@
         <p class="note">Binary keys/values are converted to hex for viewing.</p>
       </div>
       <div id="grid-container">
-        <dialog id="show-data-dialog" v-if="state.showDataDialog" class="hide">
+        <dialog id="show-data-dialog" v-show="state.showDataDialog" class="hide">
           <span id="dialog-close" @click="closeDialog">✕</span>
-          <textarea rows="6" ref="textarea"></textarea>
+          <textarea rows="6"></textarea>
         </dialog>
         <div id="grid-wrapper">
           <vue-good-table
@@ -67,6 +67,7 @@
             }"
             v-on:page-change="onPageChange"
             v-on:search="onSearch"
+            v-on:cell-click="onCellClick"
           />
         </div>
       </div>

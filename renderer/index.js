@@ -3,49 +3,7 @@ import * as Vue from 'vue'
 import VueGoodTablePlugin from 'vue-good-table-next'
 import debounce from 'lodash.debounce'
 
-let userIsPressingCtrlKey = false
-
-document.addEventListener('keydown', event => {
-  if (event.code === 'ControlLeft' || event.code === 'ControlRight') {
-    userIsPressingCtrlKey = true
-  }
-})
-
-document.addEventListener('keyup', event => {
-  if (event.code === 'ControlLeft' || event.code === 'ControlRight') {
-    userIsPressingCtrlKey = false
-  }
-})
-
-// const tdMouseEvents = cell => ({
-//   onclick: event => {
-//     if (!userIsPressingCtrlKey) return
-
-//     $('#show-data-dialog>textarea').value = ''
-
-//     const type = event.target.dataset.columnId
-//     const row = Number(event.target.parentNode.firstElementChild.textContent.trim()) - 1
-
-//     let thingToShow = event.target.dataset.columnId === 'value' ? indexedDBData[row][1] : indexedDBData[row][0]
-
-//     $('#show-data-dialog').classList.remove('hide')
-//     $('#show-data-dialog>textarea').value = thingToShow
-//   },
-//   onmouseenter: event => {
-//     if (!userIsPressingCtrlKey) return
-//     event.target.style.cursor = 'pointer'
-//   },
-//   onmouseleave: event => {
-//     event.target.style.cursor = 'auto'
-//   },
-//   onmousemove: event => {
-//     if (userIsPressingCtrlKey) {
-//       event.target.style.cursor = 'pointer'
-//     } else {
-//       event.target.style.cursor = 'auto'
-//     }
-//   },
-// })
+let nonProxifiedRows = []
 
 const state = Vue.reactive({
   dbCompression: false,
@@ -81,6 +39,14 @@ function trimDBDataForTableCell({ key, value }) {
   return { key, value }
 }
 
+function tryPrettifyJSON(val) {
+  try {
+    return JSON.stringify(JSON.parse(val), null, ' ')
+  } catch (error) {
+    return val
+  }
+}
+
 const MainComponent = Vue.defineComponent({
   data() {
     return { state }
@@ -97,6 +63,7 @@ const MainComponent = Vue.defineComponent({
         .then(({ totalResultCount, searchResultsPageChunk }) => {
           console.log('Page of db items:', searchResultsPageChunk)
 
+          nonProxifiedRows = searchResultsPageChunk
           state.rows = searchResultsPageChunk.map(trimDBDataForTableCell)
           state.totalRows = totalResultCount
 
@@ -108,7 +75,8 @@ const MainComponent = Vue.defineComponent({
         })
     }, delay)
   },
-  mount() {
+  mounted() {
+    // Hidden, then removed first to prevent a flash of the element on load
     Array.from(document.querySelectorAll('.hide')).forEach(elem => elem.classList.remove('hide'))
   },
   methods: {
@@ -136,7 +104,9 @@ const MainComponent = Vue.defineComponent({
 
       state.dbFilePath = dbData.dbFilePath
 
+      nonProxifiedRows = dbData.items
       state.rows = dbData.items.map(trimDBDataForTableCell)
+
       state.totalRows = dbData.totalRows
     },
     onPageChange(params) {
@@ -146,11 +116,11 @@ const MainComponent = Vue.defineComponent({
 
       api
         .retrievePageOfDBItems(state.currentPage, searchTerm)
-        .then(items => items.map(trimDBDataForTableCell))
         .then(pageOfDbData => {
           console.log('Page of db items:', pageOfDbData)
 
-          state.rows = pageOfDbData
+          nonProxifiedRows = pageOfDbData
+          state.rows = pageOfDbData.map(trimDBDataForTableCell)
 
           this.scrollTableToTop()
         })
@@ -159,7 +129,16 @@ const MainComponent = Vue.defineComponent({
           alert(err.toString())
         })
     },
+    onCellClick(params) {
+      state.showDataDialog = true
+      const cellData = nonProxifiedRows[params.rowIndex][params.column.field]
+
+      console.log(cellData)
+
+      document.querySelector('textarea').value = tryPrettifyJSON(cellData)
+    },
     resetStateRowData() {
+      nonProxifiedRows = []
       state.rows = []
       state.totalRows = 0
       state.currentPage = 1
@@ -170,7 +149,7 @@ const MainComponent = Vue.defineComponent({
     },
     closeDialog() {
       state.showDataDialog = false
-      this.$refs.textarea.value = ''
+      document.querySelector('textarea').value = ''
     },
   },
 })

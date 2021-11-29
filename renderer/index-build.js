@@ -19496,17 +19496,7 @@ var index = {
 
 // renderer/index.js
 var import_lodash = __toModule(require_lodash());
-var userIsPressingCtrlKey = false;
-document.addEventListener("keydown", (event) => {
-  if (event.code === "ControlLeft" || event.code === "ControlRight") {
-    userIsPressingCtrlKey = true;
-  }
-});
-document.addEventListener("keyup", (event) => {
-  if (event.code === "ControlLeft" || event.code === "ControlRight") {
-    userIsPressingCtrlKey = false;
-  }
-});
+var nonProxifiedRows = [];
 var state = reactive({
   dbCompression: false,
   dbEncoding: "msgpack",
@@ -19536,6 +19526,13 @@ function trimDBDataForTableCell({ key, value }) {
   }
   return { key, value };
 }
+function tryPrettifyJSON(val) {
+  try {
+    return JSON.stringify(JSON.parse(val), null, " ");
+  } catch (error) {
+    return val;
+  }
+}
 var MainComponent = defineComponent({
   data() {
     return { state };
@@ -19547,6 +19544,7 @@ var MainComponent = defineComponent({
       console.log(state.searchTerm);
       api.searchDb(searchTerm, state.currentPage).then(({ totalResultCount, searchResultsPageChunk }) => {
         console.log("Page of db items:", searchResultsPageChunk);
+        nonProxifiedRows = searchResultsPageChunk;
         state.rows = searchResultsPageChunk.map(trimDBDataForTableCell);
         state.totalRows = totalResultCount;
         this.scrollTableToTop();
@@ -19556,7 +19554,7 @@ var MainComponent = defineComponent({
       });
     }, delay);
   },
-  mount() {
+  mounted() {
     Array.from(document.querySelectorAll(".hide")).forEach((elem) => elem.classList.remove("hide"));
   },
   methods: {
@@ -19577,22 +19575,31 @@ var MainComponent = defineComponent({
       console.log(`DB total size: ${dbData.totalRows} items`);
       console.log("Initial page of db items:", dbData.items);
       state.dbFilePath = dbData.dbFilePath;
+      nonProxifiedRows = dbData.items;
       state.rows = dbData.items.map(trimDBDataForTableCell);
       state.totalRows = dbData.totalRows;
     },
     onPageChange(params) {
       state.currentPage = params.currentPage;
       const searchTerm = state.searchTerm.length > 0 ? state.searchTerm : null;
-      api.retrievePageOfDBItems(state.currentPage, searchTerm).then((items) => items.map(trimDBDataForTableCell)).then((pageOfDbData) => {
+      api.retrievePageOfDBItems(state.currentPage, searchTerm).then((pageOfDbData) => {
         console.log("Page of db items:", pageOfDbData);
-        state.rows = pageOfDbData;
+        nonProxifiedRows = pageOfDbData;
+        state.rows = pageOfDbData.map(trimDBDataForTableCell);
         this.scrollTableToTop();
       }).catch((err) => {
         console.error(err);
         alert(err.toString());
       });
     },
+    onCellClick(params) {
+      state.showDataDialog = true;
+      const cellData = nonProxifiedRows[params.rowIndex][params.column.field];
+      console.log(cellData);
+      document.querySelector("textarea").value = tryPrettifyJSON(cellData);
+    },
     resetStateRowData() {
+      nonProxifiedRows = [];
       state.rows = [];
       state.totalRows = 0;
       state.currentPage = 1;
@@ -19603,7 +19610,7 @@ var MainComponent = defineComponent({
     },
     closeDialog() {
       state.showDataDialog = false;
-      this.$refs.textarea.value = "";
+      document.querySelector("textarea").value = "";
     }
   }
 });
