@@ -15,6 +15,10 @@ It uses [lmdb-store](https://www.npmjs.com/package/lmdb-store) under the hood.
 3. `npx electron-rebuild` - this is to rebuild the `lmd-store` node bindings for electron
 4. `npm start`
 
+#### Search
+
+Search is only available for non-binary keys/values.
+
 #### Alternatives
 
 - https://github.com/cleve/lmdb-viewer
