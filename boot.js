@@ -28,7 +28,7 @@ app.on('window-all-closed', () => {
 
 let db = null
 
-const numItemsPerPage = 500
+const numItemsPerPage = 300
 
 const isBinaryBuffer = val => val instanceof Uint8Array
 const isNotBinaryBuffer = val => !isBinaryBuffer(val)
