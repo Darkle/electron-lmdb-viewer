@@ -46,6 +46,21 @@ function convertAnyBinaryDataToHexString({ key, value }) {
   return { key, value }
 }
 
+function stringify(val) {
+  // if (isBinaryBuffer(key)) {
+  // If they wanted to search binary, would they want to search by hex or would we assume its text in binary form and use TextDecoder? I guess could add a checkbox or summin to the search.
+  //   key = new TextDecoder('utf-8').decode(key)
+  // }
+  // if (isBinaryBuffer(value)) {
+  //   value = new TextDecoder('utf-8').decode(value)
+  // }
+  try {
+    return JSON.stringify(val)
+  } catch (error) {
+    return val.toString()
+  }
+}
+
 const dbCache = {
   get totalRows() {
     return this.items.length
@@ -64,19 +79,12 @@ const dbCache = {
     const searchResults = this.items.filter(({ key, value }) => {
       try {
         // Note: These conversions are just for the searching, so we can search by string.
-        // if (isBinaryBuffer(key)) {
-        // If they wanted to search binary, would they want to search by hex or would we assume its text in binary form and use TextDecoder? I guess could add a checkbox or summin to the search.
-        //   key = new TextDecoder('utf-8').decode(key)
-        // }
-        // if (isBinaryBuffer(value)) {
-        //   value = new TextDecoder('utf-8').decode(value)
-        // }
-        // Ignoring binary for now
+        // Ignoring binary for now.
         if (isNotString(key) && isNotBinaryBuffer(key)) {
-          key = key.toString()
+          key = stringify(key)
         }
         if (isNotString(value) && isNotBinaryBuffer(value)) {
-          value = value.toString()
+          value = stringify(value)
         }
         if (isString(key) && key.toLowerCase().includes(searchTerm)) {
           return true
@@ -108,7 +116,6 @@ ipcMain.handle('search-db', (event, searchTerm, page) => {
   return dbCache.search(searchTerm, offset)
 })
 
-// eslint-disable-next-line max-lines-per-function,complexity
 ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
   try {
     const dbPath = await dialog
