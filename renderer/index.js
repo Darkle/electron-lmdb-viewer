@@ -27,7 +27,7 @@ const state = Vue.reactive({
 })
 
 // Cant show the whole data in the table cell as some data might be huge.
-// We show it all in the textarea popup on ctrl+click instead.
+// We show it all in the textarea popup on click instead.
 function trimDBDataForTableCell({ key, value }) {
   if (value.length > 100) {
     value = value.slice(0, 100) + '...'
