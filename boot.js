@@ -2,6 +2,8 @@
 const path = require('path')
 
 const lmdb = require('lmdb')
+const msgpackr = require('msgpackr')
+const cborX = require('cbor-x')
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 
@@ -29,6 +31,8 @@ app.on('window-all-closed', () => {
 let db = null
 
 const numItemsPerPage = 300
+
+let dbEncodingType = 'msgpack'
 
 const isBinaryBuffer = val => val instanceof Uint8Array
 const isNotBinaryBuffer = val => !isBinaryBuffer(val)
@@ -61,6 +65,19 @@ function stringify(val) {
   }
 }
 
+function convertDBDataToOriginalForm(dbDataRow) {
+  if (dbEncodingType === 'msgpack') {
+    return { key: dbDataRow.key, value: stringify(dbDataRow.value) }
+  }
+  if (dbEncodingType === 'cbor') {
+    return { key: dbDataRow.key, value: stringify(dbDataRow.value) }
+  }
+  if (dbEncodingType === 'json') {
+    return { key: dbDataRow.key, value: stringify(dbDataRow.value) }
+  }
+  return
+}
+
 const dbCache = {
   get totalRows() {
     return this.items.length
@@ -69,7 +86,7 @@ const dbCache = {
   getPageOfDBItems(offset = 0) {
     const indexStart = offset === 0 ? offset : offset - 1
     const indexEnd = indexStart + numItemsPerPage
-    return this.items.slice(indexStart, indexEnd).map(convertAnyBinaryDataToHexString)
+    return this.items.slice(indexStart, indexEnd)
   },
   search(searchTerm, offset) {
     searchTerm = searchTerm.toLowerCase()
@@ -78,14 +95,7 @@ const dbCache = {
     // This could prolly be improved
     const searchResults = this.items.filter(({ key, value }) => {
       try {
-        // Note: These conversions are just for the searching, so we can search by string.
         // Ignoring binary for now.
-        if (isNotString(key) && isNotBinaryBuffer(key)) {
-          key = stringify(key)
-        }
-        if (isNotString(value) && isNotBinaryBuffer(value)) {
-          value = stringify(value)
-        }
         if (isString(key) && key.toLowerCase().includes(searchTerm)) {
           return true
         }
@@ -116,7 +126,8 @@ ipcMain.handle('search-db', (event, searchTerm, page) => {
   return dbCache.search(searchTerm, offset)
 })
 
-ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
+ipcMain.handle('open-new-db', async (event, compression, dbEncType) => {
+  dbEncodingType = dbEncType
   try {
     const dbPath = await dialog
       .showOpenDialog({ properties: ['openFile', 'showHiddenFiles'] })
@@ -130,7 +141,7 @@ ipcMain.handle('open-new-db', async (event, compression, dbEncodingType) => {
 
     db = lmdb.open(dbPath, { compression, encoding: dbEncodingType })
 
-    dbCache.items = [...db.getRange()]
+    dbCache.items = [...db.getRange()].map(convertDBDataToOriginalForm)
 
     const dbFirstPageOfDBItems = dbCache.getPageOfDBItems()
 
